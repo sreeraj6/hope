@@ -1,0 +1,25 @@
+{
+  "name": "hope-networking",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "assets": "node scripts/assets.mjs && node scripts/client-placeholders.mjs",
+    "dev": "npm run assets && node scripts/generate.mjs && vite --host 127.0.0.1",
+    "build": "npm run assets && node scripts/generate.mjs && vite build && node scripts/postbuild.mjs",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "node --test tests/*.test.mjs",
+    "test:e2e": "npx playwright test tests/e2e.spec.mjs",
+    "check:launch": "node scripts/check-launch.mjs",
+    "verify:links": "node scripts/verify-links.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/dm-sans": "^5.3.0",
+    "@fontsource-variable/manrope": "^5.3.0",
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "vite": "^7.1.0"
+  }
+}
