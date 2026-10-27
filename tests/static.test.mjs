@@ -19,7 +19,8 @@ for (const route of routes) {
     assert.match(html, /<main id="main">/);
     assert.ok(html.length > 5500);
     if (deployment().url) assert.match(html, /rel="canonical"/);
-    if (!config.launchReady) assert.match(html, /content="noindex,follow"/);
+    assert.match(html, (config.searchIndexing ?? config.launchReady) && deployment().url
+      ? /content="index,follow"/ : /content="noindex,follow"/);
   });
 }
 test('unverified brand and project proof is not published', async () => {
@@ -39,4 +40,25 @@ test('fallback and real 404 are exported', async () => {
   const missing = await readFile('dist/404.html', 'utf8');
   assert.match(missing, /noindex,follow/);
   assert.match(missing, /Page Not Found/);
+});
+
+test('home page ships crawlable copy with a local, non-blocking scene intro', async () => {
+  const html = await readFile('dist/index.html', 'utf8');
+  assert.match(html, /Preparing your connected home/);
+  assert.match(html, /<h1>A home that/);
+  assert.match(html, /id="scene-canvas"/);
+  assert.doesNotMatch(html, /home-loader|loader-mark/);
+});
+
+test('crawler discovery files include the configured canonical site', async () => {
+  const { url } = deployment();
+  const robots = await readFile('dist/robots.txt', 'utf8');
+  const sitemap = await readFile('dist/sitemap.xml', 'utf8');
+  assert.match(robots, /Allow: \//);
+  if (url) {
+    assert.ok(robots.includes(`Sitemap: ${url}sitemap.xml`));
+    for (const route of routes) assert.ok(sitemap.includes(`<loc>${url}${route.replace(/^\//, '')}</loc>`));
+  }
+  assert.ok(!sitemap.includes('/404.html'));
+  assert.doesNotMatch(await readFile('dist/index.html', 'utf8'), /class="home-loader"/);
 });

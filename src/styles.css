@@ -11,6 +11,29 @@
 #experience .hero-poster{display:block;padding:60px;width:100%;height:100%;object-fit:contain;opacity:.75;transition:opacity .7s ease}
 #experience:not(.experience-live) .hero-poster{display:block}
 #experience .scene-ready .hero-poster{opacity:0}
+/* A quiet, hero-local signal while the split 3D module and first frame initialize. */
+#experience .scene-intro{position:absolute;z-index:2;top:72px;right:5%;display:flex;align-items:center;gap:12px;padding:10px 14px;color:#dce6de;background:#152321e8;border:1px solid #b3d5b466;box-shadow:0 8px 30px #0004;backdrop-filter:blur(8px);pointer-events:none;opacity:0;visibility:hidden;transform:translateY(-5px);transition:opacity .35s ease,visibility .35s ease,transform .35s ease}
+#experience .scene-intro[hidden]{display:none}
+#experience .scene-loading .scene-intro{opacity:1;visibility:visible;transform:translateY(0)}
+#experience .scene-intro-mark{height:24px;width:27px;display:flex;align-items:center;justify-content:center;gap:4px;border:1px solid #a9d7b44d;border-radius:50%;background:#a9d7b40b}
+#experience .scene-intro-mark i{display:block;width:2px;height:8px;border-radius:2px;background:#a9d7b4;opacity:.45;transform:scaleY(.65);animation:signal-pulse 1s ease-in-out infinite alternate}
+#experience .scene-intro-mark i:nth-child(2){animation-delay:.12s}#experience .scene-intro-mark i:nth-child(3){animation-delay:.24s}#experience .scene-intro-mark i:nth-child(4){animation-delay:.36s}
+#experience .scene-intro-label{font:600 9px/1.5 var(--font);letter-spacing:.14em;text-transform:uppercase;color:#e0e9e2}
+@keyframes signal-pulse{to{opacity:1;transform:scaleY(1.7);box-shadow:0 0 12px #a9d7b477}}
+#experience:not(.experience-live) .scene-intro{display:none}
+@media(max-width:599px){#experience .scene-intro{top:58px;right:16px;padding:8px 10px}#experience .scene-intro-label{font-size:8px}}
+@media(prefers-reduced-motion:reduce){#experience .scene-intro{display:none!important}}
+/* One quiet entrance; copy is always painted and retains its normal layout.
+   Transform-only motion avoids hiding the heading or delaying its first paint. */
+@media(prefers-reduced-motion:no-preference){
+  #experience .hero-copy>*{animation:home-arrive .7s cubic-bezier(.22,1,.36,1) backwards}
+  #experience .hero-copy>h1{animation-duration:.85s}
+  #experience .hero-copy>.hero-actions{animation-duration:1s}
+  #experience .hero-copy>.local-note{animation-duration:1.1s}
+  #experience .scene-intro::after{content:"";position:absolute;inset:auto 0 -1px;height:1px;background:linear-gradient(90deg,transparent,#c3dec7,transparent);transform-origin:left;animation:home-loading 1.4s ease-in-out infinite}
+}
+@keyframes home-arrive{from{transform:translateY(12px)}to{transform:translateY(0)}}
+@keyframes home-loading{0%{transform:scaleX(.15);opacity:.3}50%{transform:scaleX(1);opacity:.9}100%{transform:scaleX(.15);opacity:.3}}
 /* Keep subsequent content on an opaque layer above the departing sticky scene. */
 #experience ~ section{position:relative;z-index:1;background-color:var(--paper)}
 #experience ~ .system-section{background-color:var(--ink)}
@@ -186,3 +209,20 @@ html{scroll-behavior:auto}*,*:before,*:after{animation:none!important;transition
 @media(min-width:600px){.review-track{grid-auto-columns:calc((100% - 18px)/2)}}
 @media(min-width:1000px){.review-track{grid-auto-columns:calc((100% - 36px)/3)}}
 @media(prefers-reduced-motion:reduce){.review-track{scroll-behavior:auto}}
+
+/* Full-viewport brand arrival: decorative only, never a loading gate. */
+.homepage-intro{display:none}
+html.js-enabled .homepage-intro{position:fixed;inset:0;z-index:100;display:grid;place-items:center;pointer-events:none;background:rgba(21,30,33,.18);animation:intro-clear 1.15s cubic-bezier(.22,1,.36,1) forwards}
+.homepage-intro::before{content:"";position:absolute;inset:18px;border:1px solid rgba(221,235,219,.16);pointer-events:none}
+.homepage-intro::after{content:"HOPE  NETWORKING";position:absolute;top:calc(50% + 64px);font:600 9px/1.5 var(--font);letter-spacing:.2em;color:#e7ede5;animation:intro-wordmark 1.15s ease forwards}
+.homepage-intro-mark{width:68px;height:68px;overflow:visible;stroke:#d9e7d7;stroke-width:1.15}
+.homepage-intro-mark .intro-orbit{stroke-dasharray:3 5;transform-origin:36px 36px;animation:intro-orbit 1.8s linear infinite}
+.homepage-intro-mark .intro-path{stroke-dasharray:48;stroke-dashoffset:48;animation:intro-draw .75s .08s ease-out forwards}
+.homepage-intro-mark .intro-node{fill:#d9e7d7;stroke:none;animation:intro-node 1s ease-in-out infinite alternate}
+.homepage-intro-mark .intro-node:last-child{animation-delay:.18s}
+@keyframes intro-clear{0%,56%{opacity:1}100%{opacity:0;visibility:hidden}}
+@keyframes intro-wordmark{0%,50%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-4px)}}
+@keyframes intro-orbit{to{transform:rotate(360deg)}}
+@keyframes intro-draw{to{stroke-dashoffset:0}}
+@keyframes intro-node{to{opacity:.35;transform:scale(.8)}}
+@media(prefers-reduced-motion:reduce){.homepage-intro{display:none!important}}

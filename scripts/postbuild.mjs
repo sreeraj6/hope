@@ -10,4 +10,4 @@ await writeFile('dist/.nojekyll', '');
 const cname = url ? new URL(url).hostname : '';
 if (cname) await writeFile('dist/CNAME', cname + '\n');
 if (base !== '/') console.log('Project subpath: robots.txt must be managed at hostname root. Submit the sitemap directly to Search Console.');
-if (!config.launchReady || !url) console.log('Preview build: all pages are noindex. Run npm run check:launch before production deployment.');
+if (!(config.searchIndexing ?? config.launchReady) || !url) console.log('Search indexing disabled. Configure searchIndexing and the final site URL to enable it.');

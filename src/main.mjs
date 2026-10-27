@@ -113,44 +113,89 @@ if (hero) {
     (navigator.deviceMemory && navigator.deviceMemory < 2);
   let dispose;
   let cancelled = false;
+  let sceneFrame;
+  let frameHandler;
+  let finishIntroTimer;
+  let hideIntroTimer;
+  let introDismissed = false;
+  // Reserve the final layout while the lightweight poster is visible.
+  experience.classList.toggle('experience-live', !motion.matches && !constrained);
+  const cancelScheduledScene = () => cancelAnimationFrame(sceneFrame);
   const intro = hero.querySelector('.scene-intro');
   const initialize = async () => {
     if (cancelled) return;
     if (motion.matches || constrained) {
       experience.classList.remove('experience-live');
+      hero.classList.remove('scene-loading', 'scene-intro-live');
+      intro.hidden = true;
       return;
     }
     experience.classList.add('experience-live');
-    intro.hidden = true;
+    intro.hidden = false;
+    hero.classList.add('scene-loading', 'scene-intro-live');
+    hideIntroTimer = undefined;
+    introDismissed = false;
+    const dismissIntro = () => {
+      if (introDismissed) return;
+      introDismissed = true;
+      hero.classList.remove('scene-loading', 'scene-intro-live');
+      hideIntroTimer = setTimeout(() => { intro.hidden = true; }, 400);
+    };
+    finishIntroTimer = setTimeout(dismissIntro, 2000);
     try {
       const { createScene } = await import('./scene.mjs');
       if (motion.matches || cancelled) return;
+      frameHandler = () => {
+        clearTimeout(finishIntroTimer);
+        clearTimeout(hideIntroTimer);
+        dismissIntro();
+        hero.removeEventListener('scene:firstframe', frameHandler);
+      };
+      hero.addEventListener('scene:firstframe', frameHandler);
       dispose = createScene(hero);
     } catch {
+      clearTimeout(finishIntroTimer);
+      clearTimeout(hideIntroTimer);
       hero.classList.remove('scene-ready');
       hero.querySelector('.scene-controls').hidden = true;
       intro.hidden = true;
+      hero.classList.remove('scene-loading', 'scene-intro-live');
+      if (frameHandler) hero.removeEventListener('scene:firstframe', frameHandler);
       experience.classList.remove('experience-live');
     }
   };
-  // Give the initial document and poster a paint before initializing WebGL.
-  requestAnimationFrame(() => requestAnimationFrame(initialize));
+  // Begin as soon as the browser has painted the poster and hero content.
+  const scheduleScene = () => {
+    cancelScheduledScene();
+    if (motion.matches || constrained || cancelled) return;
+    sceneFrame = requestAnimationFrame(() => {
+      sceneFrame = requestAnimationFrame(initialize);
+    });
+  };
+  scheduleScene();
   motion.addEventListener('change', event => {
     if (event.matches) {
+      cancelScheduledScene();
       dispose?.();
       dispose = undefined;
-      hero.classList.remove('scene-ready');
+      clearTimeout(finishIntroTimer);
+      clearTimeout(hideIntroTimer);
+      if (frameHandler) hero.removeEventListener('scene:firstframe', frameHandler);
+      hero.classList.remove('scene-ready', 'scene-loading', 'scene-intro-live');
       intro.hidden = true;
       hero.querySelector('.scene-controls').hidden = true;
       experience.classList.remove('experience-live');
     } else {
-      experience.classList.add('experience-live');
-      initialize();
+      experience.classList.toggle('experience-live', !constrained);
+      scheduleScene();
     }
   });
-  window.addEventListener('pagehide', () => { cancelled = true; dispose?.(); dispose = undefined; });
+  window.addEventListener('pagehide', () => {
+    cancelled = true; cancelScheduledScene(); clearTimeout(finishIntroTimer); clearTimeout(hideIntroTimer);
+    dispose?.(); dispose = undefined;
+  });
   window.addEventListener('pageshow', event => {
-    if (event.persisted) { cancelled = false; initialize(); }
+    if (event.persisted) { cancelled = false; scheduleScene(); }
   });
 }
 

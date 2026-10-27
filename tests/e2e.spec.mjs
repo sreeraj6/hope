@@ -144,3 +144,21 @@ test('Network hands off to opaque services without a lingering house', async ({ 
   await page.screenshot({ path: `test-results/services-transition-${test.info().project.name}.png` });
   expect(errors).toEqual([]);
 });
+
+test('poster remains behind a restrained intro until the first 3D frame is ready', async ({ page }) => {
+  await page.route('**/assets/scene-*.js', route => new Promise(resolve => {
+    setTimeout(() => resolve(route.continue()), 700);
+  }));
+  await page.goto(`${base}/`, { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('h1')).toBeVisible();
+  await expect(page.locator('.hero-actions a').first()).toBeVisible();
+  await expect(page.locator('.home-loader')).toHaveCount(0);
+  await expect(page.locator('.scene-intro')).toBeAttached();
+  await expect(page.locator('.scene-intro')).toBeVisible();
+  await expect(page.locator('.scene-intro-label')).toHaveText('Preparing your connected home');
+  await expect(page.locator('.hero-poster')).toBeVisible();
+  const html = await page.locator('main').textContent();
+  expect(html).toContain('A home that');
+  await expect(page.locator('#hero-visual')).toHaveClass(/scene-ready/, { timeout: 5000 });
+  await expect(page.locator('.scene-intro')).toBeHidden();
+});

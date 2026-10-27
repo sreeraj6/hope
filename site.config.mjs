@@ -19,6 +19,9 @@ export default {
   serviceAreas: ['Vallikkavu'],
   // Leave false until contact details, content, rights, and hosting are verified.
   launchReady: false,
+  // Search visibility is separate from publishing/business approval checks.
+  // Set false for private staging builds; 404 pages always remain noindex.
+  searchIndexing: true,
   hostingEligibilityConfirmed: false,
   contentApproved: false,
   automationOffered: false,

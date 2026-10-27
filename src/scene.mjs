@@ -235,7 +235,7 @@ export function createScene(host) {
   const chapters=[experience.querySelector('.hero'),...experience.querySelectorAll('.journey-chapter')];
   const caption=host.querySelector('#scene-caption'),pauseButton=host.querySelector('#scene-pause'),replay=host.querySelector('#scene-replay');
   const captions=['00 / Your connected home','01 / Automated gate · Arrival','02 / Perimeter cameras · CCTV','03 / Camera feeds & server racks','04 / Connected in every corner'];
-  let target=0,current=0,frame=0,disposed=false,visible=true,paused=false,time=0,lastTime=0,feedFrame=0,active=-1;
+  let target=0,current=0,frame=0,disposed=false,visible=true,paused=false,time=0,lastTime=0,feedFrame=0,active=-1,firstFrameReady=false;
   let anchors=[];
   const clamp=THREE.MathUtils.clamp;
   const smooth=t=>t*t*(3-2*t);
@@ -284,6 +284,11 @@ export function createScene(host) {
     if(next!==active){active=next;host.dataset.chapter=String(next);caption.textContent=captions[next];tabs.forEach((b,n)=>b.setAttribute('aria-pressed',String(n===next)));}
     host.style.setProperty('--tour-progress',`${current/4*100}%`);
     renderer.render(scene,camera);
+    if(!firstFrameReady){
+      firstFrameReady=true;
+      host.classList.add('scene-ready');
+      host.dispatchEvent(new Event('scene:firstframe'));
+    }
     if(!paused&&(Math.abs(target-current)>.001||inside||network.visible))request();
   }
   function request(){if(!frame&&!disposed&&visible&&!document.hidden)frame=requestAnimationFrame(draw);}
@@ -311,6 +316,6 @@ export function createScene(host) {
     geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());targets.forEach(t=>t.dispose());
     renderer.dispose();renderer.domElement.remove();host.classList.remove('scene-ready');experience.classList.remove('experience-live');host.querySelector('.scene-controls').hidden=true;
   }
-  host.classList.add('scene-ready');experience.classList.add('experience-live');host.querySelector('.scene-controls').hidden=false;
+  experience.classList.add('experience-live');host.querySelector('.scene-controls').hidden=false;
   interior.visible=false;network.visible=false;resize();return dispose;
 }

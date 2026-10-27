@@ -22,4 +22,10 @@ Production build, static HTML/enquiry tests and 398 internal links/assets passed
 
 Output is in dist. Run npm run build, npm test, npm run verify:links and npm run check:launch before deployment. Browser tests use npm run test:e2e; PLAYWRIGHT_CHANNEL=chrome can select installed Chrome.
 
-Live deployment has not been performed. The existing launch checker requires the final HTTPS SITE_URL/siteUrl, launchReady, hostingEligibilityConfirmed and contentApproved in site.config.mjs. These values were not invented or silently approved. Until configured, preview pages intentionally remain noindex and the sitemap lacks production URLs. Real-device Core Web Vitals and external WhatsApp delivery are not established by local browser tests.
+Live deployment has not been performed. The existing launch checker requires the final HTTPS SITE_URL/siteUrl, launchReady, hostingEligibilityConfirmed and contentApproved in site.config.mjs. These values were not invented or silently approved. Search indexing is now enabled separately through `searchIndexing: true` for the configured canonical domain. Set it false for private staging. Deployment approval flags are unchanged; the 404 page remains noindex. Real-device Core Web Vitals and external WhatsApp delivery are not established by local browser tests.
+
+## Deferred animation and crawlability (27 October 2026)
+
+The branded loader stays visible for two seconds on the homepage and then fades away. The complete static HTML remains in the initial response beneath it for crawlers. The independent Three.js import keeps its light poster fallback and capability checks. Reduced motion removes decorative loader motion.
+
+Search visibility is controlled separately from publishing approval via `searchIndexing`. Production pages now emit `index,follow` with canonical URLs, while 404 stays `noindex,follow`. Static page content, sitemap, robots, and structured data remain available without WebGL or JavaScript. Enabling crawling does not guarantee indexing or ranking; actual Google indexing can be checked and requested through the domain owner's Search Console. No live deployment or field performance measurement was performed in this change.
