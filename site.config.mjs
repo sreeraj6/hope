@@ -26,6 +26,15 @@ export default {
   // { name: 'Hikvision', verified: true }, { name: 'TP-Link', verified: true },
   // { name: 'PRAMA', verified: true }, { name: 'CP Plus', verified: true }
   brands: [],
+  // Real customer feedback only, with permission to publish the display name.
+  // { name: 'Customer display name', text: 'Exact approved review', service: 'CCTV installation', sourceUrl: 'https://...', approved: true }
+  reviews: [
+    { name: 'Demo sample 1', text: 'SAMPLE ONLY — Replace this placeholder with an approved customer review about CCTV installation.', service: 'CCTV installation', rating: 5, approved: true, sample: true },
+    { name: 'Demo sample 2', text: 'SAMPLE ONLY — Replace this placeholder with an approved customer review about home security planning.', service: 'Home security', rating: 5, approved: true, sample: true },
+    { name: 'Demo sample 3', text: 'SAMPLE ONLY — Replace this placeholder with an approved customer review about a business security setup.', service: 'Commercial security', rating: 5, approved: true, sample: true },
+    { name: 'Demo sample 4', text: 'SAMPLE ONLY — Replace this placeholder with an approved customer review about Wi-Fi coverage and networking.', service: 'Networking & Wi-Fi', rating: 5, approved: true, sample: true },
+    { name: 'Demo sample 5', text: 'SAMPLE ONLY — Replace this placeholder with an approved customer review about installation support.', service: 'Security & networking', rating: 5, approved: true, sample: true },
+  ],
   // Client category tiles shown on the homepage. Use only names/categories you
   // have permission to reference; no trademark logos without written approval.
   // Replace placeholder SVGs in public/clients/ with real client images.

@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import { readdirSync } from 'node:fs';
+import { readdirSync, copyFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { deployment } from './scripts/shared.mjs';
 
@@ -9,6 +9,17 @@ function htmlFiles(dir) {
       entry.name.endsWith('.html') ? [resolve(dir, entry.name)] : []);
 }
 export default defineConfig({
+  plugins: [{
+    name: 'sync-development-source',
+    configureServer(server) {
+      const source = resolve('src');
+      server.watcher.add(source);
+      server.watcher.on('change', file => {
+        if (!file.startsWith(`${source}/`)) return;
+        copyFileSync(file, resolve('.generated', file.slice(source.length + 1)));
+      });
+    },
+  }],
   root: '.generated',
   base: deployment().base,
   publicDir: resolve('public'),

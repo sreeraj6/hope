@@ -255,8 +255,9 @@ export function createScene(host) {
   const pos=new THREE.Vector3(),look=new THREE.Vector3();
   function draw(now=0) {
     frame=0;if(disposed||!visible||document.hidden)return;
-    const dt=Math.min((now-lastTime)/1000||.016,.05);lastTime=now;
-    if(!paused){time+=dt;current+=(target-current)*(1-Math.exp(-dt*9));}
+    const elapsed=Math.max(0,(now-lastTime)/1000)||.016;lastTime=now;
+    const dt=Math.min(elapsed,.05);
+    if(!paused){time+=dt;current+=(target-current)*(1-Math.exp(-elapsed*9));}
     if(!paused&&Math.abs(target-current)<.001)current=target;
     const i=Math.min(3,Math.floor(current)),t=smooth(current-i);
     pos.fromArray(views[i].pos).lerp(new THREE.Vector3(...views[i+1].pos),t);

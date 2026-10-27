@@ -107,6 +107,7 @@ if (form) {
 // The immersive scene is pinned within the home tour; service content follows normally.
 const hero = document.querySelector('#hero-visual');
 if (hero) {
+  const experience = hero.closest('#experience');
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const constrained = navigator.connection?.saveData ||
     (navigator.deviceMemory && navigator.deviceMemory < 2);
@@ -114,7 +115,12 @@ if (hero) {
   let cancelled = false;
   const intro = hero.querySelector('.scene-intro');
   const initialize = async () => {
-    if (motion.matches || constrained || cancelled) return;
+    if (cancelled) return;
+    if (motion.matches || constrained) {
+      experience.classList.remove('experience-live');
+      return;
+    }
+    experience.classList.add('experience-live');
     intro.hidden = true;
     try {
       const { createScene } = await import('./scene.mjs');
@@ -124,6 +130,7 @@ if (hero) {
       hero.classList.remove('scene-ready');
       hero.querySelector('.scene-controls').hidden = true;
       intro.hidden = true;
+      experience.classList.remove('experience-live');
     }
   };
   // Give the initial document and poster a paint before initializing WebGL.
@@ -135,10 +142,61 @@ if (hero) {
       hero.classList.remove('scene-ready');
       intro.hidden = true;
       hero.querySelector('.scene-controls').hidden = true;
-    } else initialize();
+      experience.classList.remove('experience-live');
+    } else {
+      experience.classList.add('experience-live');
+      initialize();
+    }
   });
   window.addEventListener('pagehide', () => { cancelled = true; dispose?.(); dispose = undefined; });
   window.addEventListener('pageshow', event => {
     if (event.persisted) { cancelled = false; initialize(); }
   });
+}
+
+// Smooth, seamless review loop. Hovering the review area pauses it.
+const reviewTrack = document.querySelector('.review-track');
+if (reviewTrack) {
+  const originals = [...reviewTrack.querySelectorAll('[data-review-original]')];
+  const controls = document.querySelector('.review-controls');
+  const status = controls.querySelector('.review-status');
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  let cycleWidth = 0;
+  let previousTime = 0;
+  let frame;
+  const clones = originals.map(card => {
+    const clone = card.cloneNode(true);
+    clone.removeAttribute('data-review-original');
+    clone.setAttribute('aria-hidden', 'true');
+    clone.inert = true;
+    return clone;
+  });
+  clones.forEach(clone => reviewTrack.append(clone));
+  const measure = () => { cycleWidth = clones[0].offsetLeft - originals[0].offsetLeft; };
+  const update = () => {
+    const left = reviewTrack.getBoundingClientRect().left;
+    const index = originals.reduce((nearest, card, i) => Math.abs(card.getBoundingClientRect().left - left) < Math.abs(originals[nearest].getBoundingClientRect().left - left) ? i : nearest, 0);
+    status.textContent = `Review ${index + 1} of ${originals.length}`;
+  };
+  const animate = time => {
+    if (previousTime) reviewTrack.scrollLeft += Math.min(time - previousTime, 50) * 0.035;
+    previousTime = time;
+    if (cycleWidth && reviewTrack.scrollLeft >= cycleWidth) reviewTrack.scrollLeft -= cycleWidth;
+    frame = requestAnimationFrame(animate);
+  };
+  const start = () => { if (!frame && !reducedMotion.matches && originals.length > 1) frame = requestAnimationFrame(animate); };
+  const stop = () => { cancelAnimationFrame(frame); frame = undefined; previousTime = 0; };
+  controls.hidden = originals.length < 2;
+  controls.querySelectorAll('[data-review-direction]').forEach(button => button.addEventListener('click', () => {
+    const step = originals[0].getBoundingClientRect().width + parseFloat(getComputedStyle(reviewTrack).columnGap || 0);
+    reviewTrack.scrollBy({ left: Number(button.dataset.reviewDirection) * step, behavior: reducedMotion.matches ? 'instant' : 'smooth' });
+  }));
+  reviewTrack.addEventListener('mouseenter', stop);
+  reviewTrack.addEventListener('mouseleave', start);
+  reviewTrack.addEventListener('scroll', update, { passive: true });
+  reducedMotion.addEventListener('change', event => event.matches ? stop() : start());
+  new ResizeObserver(measure).observe(reviewTrack);
+  measure();
+  update();
+  start();
 }

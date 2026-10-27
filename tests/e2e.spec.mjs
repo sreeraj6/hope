@@ -121,3 +121,26 @@ test('scroll tour follows chapters, freezes when paused, and resumes', async ({ 
   await page.locator('.tour-skip').click();
   await expect(page.locator('#services h2')).toBeInViewport();
 });
+
+test('Network hands off to opaque services without a lingering house', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto(`${base}/`);
+  await expect(page.locator('#hero-visual')).toHaveClass(/scene-ready/);
+  await page.reload();
+  await expect(page.locator('#hero-visual')).toHaveClass(/scene-ready/);
+  await page.locator('[data-scene="4"]').click();
+  await expect(page.locator('#hero-visual')).toHaveAttribute('data-chapter', '4');
+  const stage = await page.locator('.experience-stage').boundingBox();
+  const visual = await page.locator('#hero-visual').boundingBox();
+  expect(Math.abs(stage.height - visual.height)).toBeLessThan(2);
+  await page.locator('#services').evaluate(el => {
+    window.scrollTo({ top: el.offsetTop - document.querySelector('.site-header').offsetHeight, behavior: 'instant' });
+  });
+  await expect(page.locator('#services h2')).toBeInViewport();
+  expect(await page.evaluate(() => document.elementFromPoint(innerWidth / 2, 150).closest('#services') !== null)).toBe(true);
+  expect(await page.locator('#services').evaluate(el => getComputedStyle(el).backgroundColor)).not.toBe('rgba(0, 0, 0, 0)');
+  await expect(page.locator('#services .service-card').first()).toBeVisible();
+  await page.screenshot({ path: `test-results/services-transition-${test.info().project.name}.png` });
+  expect(errors).toEqual([]);
+});
