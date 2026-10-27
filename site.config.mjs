@@ -8,7 +8,7 @@ export default {
   location: 'Vallikkavu, Kerala',
   country: 'IN',
   // Set to the complete site URL, including /repository/ for a project site.
-  siteUrl: '',
+  siteUrl: 'https://hope.tripvanda.com',
   phone: '+91 95676 50963',
   whatsapp: '919567650963', // Country code + number, digits only.
   instagram: 'https://www.instagram.com/hope_networking/',

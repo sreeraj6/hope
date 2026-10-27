@@ -7,5 +7,7 @@ const entries = url ? routes.map(route => `<url><loc>${escapeHtml(url + route.re
 await writeFile('dist/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${entries}</urlset>\n`);
 await writeFile('dist/robots.txt', `User-agent: *\nAllow: /\n${url ? `Sitemap: ${url}sitemap.xml\n` : ''}`);
 await writeFile('dist/.nojekyll', '');
+const cname = url ? new URL(url).hostname : '';
+if (cname) await writeFile('dist/CNAME', cname + '\n');
 if (base !== '/') console.log('Project subpath: robots.txt must be managed at hostname root. Submit the sitemap directly to Search Console.');
 if (!config.launchReady || !url) console.log('Preview build: all pages are noindex. Run npm run check:launch before production deployment.');

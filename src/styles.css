@@ -113,3 +113,6 @@
 }
 @media(max-width:899px){#experience .journey-chapter{width:calc(100% - 40px)}}
 @media(max-width:899px){#experience .hero-copy h1 em{margin-left:.12em}}
+/* Prevent poster-to-sticky layout changes from moving the reader into a later chapter. */
+#experience{overflow-anchor:none}
+#experience .hero{pointer-events:none}

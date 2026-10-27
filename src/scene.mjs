@@ -277,7 +277,8 @@ export function createScene(host) {
     rings.forEach(({ring,phase})=>{const p=(time*.22+phase)%1;ring.scale.setScalar(.4+p*3.1);ring.material.opacity=(1-p)*.3;});
     packets.forEach(({p,curve},n)=>p.position.copy(curve.getPointAt((time*.16+n*.2)%1)));
     leds.forEach((led,n)=>{led.visible=Math.sin(time*3+n*1.7)>-.65;});
-    if(inside&&feedFrame++%20===0)renderFeeds();
+    if(inside&&feedFrame===0){renderFeeds();feedFrame=1;}
+    if(!inside)feedFrame=0;
     const next=Math.round(current);
     if(next!==active){active=next;host.dataset.chapter=String(next);caption.textContent=captions[next];tabs.forEach((b,n)=>b.setAttribute('aria-pressed',String(n===next)));}
     host.style.setProperty('--tour-progress',`${current/4*100}%`);

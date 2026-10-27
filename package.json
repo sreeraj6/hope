@@ -7,6 +7,7 @@
     "assets": "node scripts/assets.mjs && node scripts/client-placeholders.mjs",
     "dev": "npm run assets && node scripts/generate.mjs && vite --host 127.0.0.1",
     "build": "npm run assets && node scripts/generate.mjs && vite build && node scripts/postbuild.mjs",
+    "deploy": "gh-pages -d dist -b gh-pages --cname hope.tripvanda.com",
     "preview": "vite preview --host 127.0.0.1",
     "test": "node --test tests/*.test.mjs",
     "test:e2e": "npx playwright test tests/e2e.spec.mjs",
@@ -20,6 +21,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",
+    "gh-pages": "^6.3.0",
     "vite": "^7.1.0"
   }
 }
